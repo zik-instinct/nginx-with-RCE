@@ -14,7 +14,7 @@
 .prompt{color:var(--green)}.output{white-space:pre-wrap;color:#c5c9d2;margin:10px 0 0}
 .caret{display:inline-block;width:8px;height:16px;vertical-align:-3px;background:var(--green);animation:blink 1s steps(2,start) infinite}
 @keyframes blink{50%{opacity:.2}}
-.commands{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.commands button{background:#242832;color:var(--ink);border:1px solid #424754;border-radius:7px;padding:10px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}.commands button:disabled{opacity:.45;cursor:wait}.commands button:focus-visible{outline:2px solid var(--green);outline-offset:2px}.terminal{overflow-wrap:anywhere}.meta{color:var(--muted);font-size:12px;margin-top:16px}
+.commands{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.commands button{background:#242832;color:var(--ink);border:1px solid #424754;border-radius:7px;padding:10px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}.commands button:disabled{opacity:.45;cursor:wait}.commands button:focus-visible{outline:2px solid var(--green);outline-offset:2px}.terminal{overflow-wrap:anywhere}.meta{color:var(--muted);font-size:12px;margin-top:16px}.meta .bounty{display:block;color:var(--ink);font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.1;letter-spacing:.02em}
 .cookie{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:18px 24px;display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;transition:transform .3s}
 .cookie.hide{transform:translateY(110%)}
 .cookie p{margin:0;max-width:60ch;font-size:13px;color:#c1c5ce}
@@ -34,7 +34,7 @@
     <pre class="output" id="output"></pre>
     <form id="console" autocomplete="off"><span class="prompt">&gt;</span><input id="input" name="command" spellcheck="false" aria-label="Console input" autocomplete="off" autocapitalize="off" autocorrect="off"><span id="cursor" aria-hidden="true"></span></form>
   </div>
-  <p class="meta">demo</p>
+  <p class="meta">Bounty for finding the RCE is........ 🥁🥁🥁 <span class="bounty">COOKIES</span></p>
 </main>
 <div class="cookie hide" id="cookie" role="dialog" aria-label="Bounty achieved">
   <p><strong>Bounty achieved.</strong><br>RCE confirmed. Your bounty: all necessary cookies.</p>
