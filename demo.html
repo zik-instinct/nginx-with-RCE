@@ -32,7 +32,7 @@
   
   <div class="terminal" aria-live="polite">
     <pre class="output" id="output"></pre>
-    <form id="console" autocomplete="off"><span class="prompt">browser&gt;</span><input id="input" name="command" spellcheck="false" aria-label="Console input" autocomplete="off" autocapitalize="off" autocorrect="off"><span id="cursor" aria-hidden="true"></span></form>
+    <form id="console" autocomplete="off"><span class="prompt">js console</span><input id="input" name="command" spellcheck="false" aria-label="Console input" autocomplete="off" autocapitalize="off" autocorrect="off"><span id="cursor" aria-hidden="true"></span></form>
   </div>
   <p class="meta">demo</p>
 </main>
@@ -45,7 +45,7 @@
 const out=document.querySelector('#output'),bar=document.querySelector('#cookie'),prompt=document.querySelector('.prompt');
 const input=document.querySelector('#input'),form=document.querySelector('#console');
 let remote=false,busy=false;
-window.server={connect(){remote=true;prompt.textContent='server$';return 'Connected.'}};
+window.server={connect(){remote=true;prompt.textContent='nginx server bash console';return 'Connected.'}};
 function format(value){if(typeof value==='string')return value;if(typeof value==='undefined')return 'undefined';try{return JSON.stringify(value,(key,item)=>typeof item==='function'?item.toString():item,2)}catch(error){return String(value)}}
 form.addEventListener('submit',async(event)=>{
   event.preventDefault();if(busy)return;
