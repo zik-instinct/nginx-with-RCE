@@ -22,7 +22,7 @@
 .cookie button.primary{background:var(--green);color:#0d1410;border-color:var(--green);font-weight:600}
 .cookie button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-#console{margin:16px 0}#console label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px}.entry{display:flex;gap:8px}.entry input{flex:1;min-width:0;padding:11px;background:#0d0f13;color:var(--ink);border:1px solid #424754;border-radius:7px;font:inherit;font-size:14px}.entry button{padding:10px 16px;border:1px solid #424754;border-radius:7px;background:#242832;color:var(--ink);font:inherit;font-size:14px;min-height:44px;cursor:pointer}.entry input:focus-visible,.entry button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+#console{display:flex;align-items:baseline;gap:8px;margin:10px 0 0}#console input{flex:1;min-width:0;width:100%;background:transparent;color:var(--ink);border:0;outline:0;padding:0;font:inherit;border-radius:0}#output:empty{display:none}#output{margin:0;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -30,13 +30,9 @@
   <h1>nginx debug console</h1>
   
   <div class="terminal" aria-live="polite">
-    <div><span class="prompt">browser&gt;</span> <span id="command"><span class="caret" aria-hidden="true"></span></span></div>
     <pre class="output" id="output"></pre>
+    <form id="console" autocomplete="off"><span class="prompt">browser&gt;</span><input id="input" name="command" spellcheck="false" aria-label="Console input" autocomplete="off" autocapitalize="off" autocorrect="off"></form>
   </div>
-  <form id="console" autocomplete="off">
-    
-    <div class="entry"><input id="input" name="command" spellcheck="false" aria-label="Console input" placeholder="" autocomplete="off"><button type="submit">Run</button></div>
-  </form>
   <p class="meta">demo</p>
 </main>
 <div class="cookie hide" id="cookie" role="dialog" aria-label="Bounty achieved">
@@ -45,7 +41,7 @@
   <button type="button" class="primary" id="accept">Accept all necessary cookies</button>
 </div>
 <script>
-const cmd=document.querySelector('#command'),out=document.querySelector('#output'),bar=document.querySelector('#cookie'),prompt=document.querySelector('.prompt');
+const out=document.querySelector('#output'),bar=document.querySelector('#cookie'),prompt=document.querySelector('.prompt');
 const input=document.querySelector('#input'),form=document.querySelector('#console');
 let remote=false,busy=false;
 window.server={connect(){remote=true;prompt.textContent='server$';return 'Connected.'}};
@@ -53,8 +49,8 @@ function format(value){if(typeof value==='string')return value;if(typeof value==
 form.addEventListener('submit',async(event)=>{
   event.preventDefault();if(busy)return;
   const command=input.value;if(!command)return;
-  input.value='';busy=true;bar.classList.add('hide');cmd.textContent=command;out.textContent='Running...';
-  form.querySelector('button').disabled=true;
+  input.value='';busy=true;bar.classList.add('hide');out.textContent=prompt.textContent+' '+command+'\nRunning...';
+  input.disabled=true;
   try{
     if(!remote){out.textContent=format(await (0,eval)(command))}
     else if(command==='help'){out.textContent='whoami\nifconfig\nping example.com -t 1'}
@@ -64,7 +60,7 @@ form.addEventListener('submit',async(event)=>{
       if(response.ok){out.textContent+='\nSuccess.';bar.classList.remove('hide')}
     }
   }catch(error){out.textContent=error.name+': '+error.message}
-  finally{busy=false;form.querySelector('button').disabled=false;input.focus()}
+  finally{busy=false;input.disabled=false;input.focus()}
 });
 document.querySelector('#accept').addEventListener('click',()=>bar.classList.add('hide'));
 </script>
