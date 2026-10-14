@@ -28,7 +28,7 @@
 </head>
 <body>
 <main class="wrap">
-  <h1>nginx debug console</h1>
+  <h1 id="title">js console</h1>
   
   <div class="terminal" aria-live="polite">
     <pre class="output" id="output"></pre>
@@ -45,7 +45,7 @@
 const out=document.querySelector('#output'),bar=document.querySelector('#cookie'),prompt=document.querySelector('.prompt');
 const input=document.querySelector('#input'),form=document.querySelector('#console');
 let remote=false,busy=false;
-window.server={connect(){remote=true;prompt.textContent='nginx server bash console';return 'Connected.'}};
+window.server={connect(){remote=true;document.querySelector('#title').textContent='nginx server bash console';prompt.textContent='nginx server bash console';return 'Connected.'}};
 function format(value){if(typeof value==='string')return value;if(typeof value==='undefined')return 'undefined';try{return JSON.stringify(value,(key,item)=>typeof item==='function'?item.toString():item,2)}catch(error){return String(value)}}
 form.addEventListener('submit',async(event)=>{
   event.preventDefault();if(busy)return;
