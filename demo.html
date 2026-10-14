@@ -14,7 +14,7 @@
 .prompt{color:var(--green)}.output{white-space:pre-wrap;color:#c5c9d2;margin:10px 0 0}
 .caret{display:inline-block;width:8px;height:16px;vertical-align:-3px;background:var(--green);animation:blink 1s steps(2,start) infinite}
 @keyframes blink{50%{opacity:.2}}
-.meta{color:var(--muted);font-size:12px;margin-top:16px}
+.commands{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.commands button{background:#242832;color:var(--ink);border:1px solid #424754;border-radius:7px;padding:10px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}.commands button:disabled{opacity:.45;cursor:wait}.commands button:focus-visible{outline:2px solid var(--green);outline-offset:2px}.terminal{overflow-wrap:anywhere}.meta{color:var(--muted);font-size:12px;margin-top:16px}
 .cookie{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:18px 24px;display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;transition:transform .3s}
 .cookie.hide{transform:translateY(110%)}
 .cookie p{margin:0;max-width:60ch;font-size:13px;color:#c1c5ce}
@@ -27,36 +27,39 @@
 <body>
 <main class="wrap">
   <h1>nginx debug console</h1>
-  <p class="sub">X-Debug-Eval enabled. Session cookie required.</p>
+  <p class="sub">X-Debug-Eval enabled.</p>
   <div class="terminal" aria-live="polite">
-    <div><span class="prompt">visitor@nginx:~$</span> <span id="command">awaiting session<span class="caret" aria-hidden="true"></span></span></div>
-    <pre class="output" id="output">Debug console is locked. Accept cookies to continue.</pre>
+    <div><span class="prompt">visitor@nginx:~$</span> <span id="command">ready<span class="caret" aria-hidden="true"></span></span></div>
+    <pre class="output" id="output">Select a command.</pre>
   </div>
-  <p class="meta">demo - nothing here executes</p>
+  <div class="commands" aria-label="Commands">
+    <button type="button" data-command="whoami">whoami</button>
+    <button type="button" data-command="ifconfig">ifconfig</button>
+    <button type="button" data-command="ping example.com -t 1">ping example.com -t 1</button>
+  </div>
+  <p class="meta">demo</p>
 </main>
-<div class="cookie" id="cookie" role="dialog" aria-label="Cookie consent">
-  <p>We use cookies to keep this debug session alive. Some are necessary. All of the ones we set are necessary.</p>
-  <button type="button" id="manage">Manage preferences</button>
+<div class="cookie hide" id="cookie" role="dialog" aria-label="Bounty achieved">
+  <p><strong>Bounty achieved.</strong><br>RCE confirmed. Your bounty: all necessary cookies.</p>
+  
   <button type="button" class="primary" id="accept">Accept all necessary cookies</button>
 </div>
 <script>
 const cmd=document.querySelector('#command'),out=document.querySelector('#output'),bar=document.querySelector('#cookie');
-const steps=[
-['id','uid=0(root) gid=0(root) groups=0(root)'],
-['cat /etc/hostname','nginx'],
-['echo $COOKIES','all of them']
-];
+const buttons=[...document.querySelectorAll('[data-command]')];
 let busy=false;
-function run(){
-  if(busy)return;busy=true;bar.classList.add('hide');out.textContent='';
-  let i=0;(function next(){
-    if(i>=steps.length){busy=false;return}
-    const [c,o]=steps[i++];cmd.textContent=c;out.textContent+=(out.textContent?'\n':'')+'$ '+c+'\n'+o;
-    setTimeout(next,700);
-  })();
+function accept(){bar.classList.add('hide')}
+async function run(command){
+  if(busy)return;
+  busy=true;bar.classList.add('hide');buttons.forEach(b=>b.disabled=true);cmd.textContent=command;out.textContent='Running...';
+  try{
+    const response=await fetch('/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command}),signal:AbortSignal.timeout(8000)});
+    const result=await response.json();out.textContent=result.output||'(no output)';if(response.ok){bar.classList.remove('hide')}
+  }catch(error){out.textContent='Session unavailable. Try again.'}
+  finally{busy=false;buttons.forEach(b=>b.disabled=false)}
 }
-document.querySelector('#accept').addEventListener('click',run);
-document.querySelector('#manage').addEventListener('click',run);
+buttons.forEach(button=>button.addEventListener('click',()=>run(button.dataset.command)));
+document.querySelector('#accept').addEventListener('click',accept);
 </script>
 </body>
 </html>
