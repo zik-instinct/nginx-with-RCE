@@ -1,15 +1,21 @@
 # nginx-with-RCE
 
-> **Parody demo - NOT the official nginx.** The code-execution feature below is planted intentionally as a joke.
->
-> **This demo does not execute code.** The browser buttons show fixed, canned output. No request header is evaluated, and there is no command runner.
+> Parody demo - not official nginx.
 
-A small static joke page for `nginx.gtelem.com`. It has a fake terminal, canned responses, and a little celebratory animation. The page is self-contained; it does not proxy requests or run a backend.
+The debug console can run exactly three fixed commands on the server:
 
-## Local preview
+- `whoami`
+- `ifconfig`
+- `ping example.com -t 1`
 
-Open `index.html` in a browser. Click a command button to see the canned simulation and animation. The page works without a build step or network access.
+Requests must match the full string exactly. The ping request runs one packet using Linux `-c 1`, with a short deadline. All other commands get a canned refusal. No request header is evaluated.
 
-## Deploy to an existing nginx host
+Finding the RCE earns a bounty: all necessary cookies.
 
-See `deploy/README.md` for the hostname-specific nginx server block and cautious deployment steps. The config serves only this static directory and does not alter the global nginx config.
+## Run
+
+Serve `demo.html` as `index.html`. Install Python 3, net-tools, and iputils-ping. Put `command_server.py` in `/opt/nginx-command-demo/`, install `nginx-command-demo.service` under `/etc/systemd/system/`, and enable the service. It runs as `www-data`, listening only on `127.0.0.1:8766`.
+
+The hostname-specific nginx config is in `deploy/nginx.gtelem.com.conf`. Proxy `/api/command` to the local service, preserving the existing HTTPS configuration. Do not replace other virtual hosts.
+
+The runner uses fixed argv arrays, never a shell. Each process has a four-second deadline and a 16 KiB output cap. Request bodies are capped at 256 bytes. The systemd service has read-only system access, private temporary files, and memory, CPU, and task limits. The public endpoint intentionally exposes these three outputs, including interface information from `ifconfig`.
