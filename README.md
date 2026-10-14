@@ -2,7 +2,9 @@
 
 > Parody demo - not official nginx.
 
-The debug console can run exactly three fixed commands on the server:
+The terminal starts as a local JavaScript console. Expressions run in the visitor's browser, not on the server. `server.connect()` switches to server mode; `help` lists the available commands.
+
+The server console can run exactly three fixed commands:
 
 - `whoami`
 - `ifconfig`
