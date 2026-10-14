@@ -7,7 +7,7 @@
 <title>nginx-with-RCE</title>
 <style>
 :root{color-scheme:dark;--bg:#111318;--panel:#191c23;--line:#30343e;--ink:#f0f1f5;--muted:#a0a5b2;--green:#9df5b7}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:16px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;display:grid;place-items:center;padding:24px 24px 190px}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:16px/1.55 "Courier New",Courier,monospace;display:grid;place-items:center;padding:24px 24px 190px}
 .wrap{width:min(100%,720px)}h1{font-size:clamp(22px,5vw,32px);letter-spacing:-.03em;margin:0 0 6px}
 .sub{color:var(--muted);margin:0 0 22px;font-size:14px}
 .terminal{min-height:150px;background:#0d0f13;border:1px solid #353943;border-radius:10px;padding:16px 18px}
@@ -22,7 +22,8 @@
 .cookie button.primary{background:var(--green);color:#0d1410;border-color:var(--green);font-weight:600}
 .cookie button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-#console{display:flex;align-items:baseline;gap:8px;margin:10px 0 0}#console input{flex:1;min-width:0;width:100%;background:transparent;color:var(--ink);border:0;outline:0;padding:0;font:inherit;border-radius:0}#output:empty{display:none}#output{margin:0;overflow-wrap:anywhere}
+#console{position:relative;display:flex;align-items:baseline;gap:8px;margin:10px 0 0}#console input{flex:1;min-width:0;width:100%;background:transparent;color:var(--ink);border:0;outline:0;padding:0;font:inherit;border-radius:0;caret-color:transparent}#output:empty{display:none}#output{margin:0;overflow-wrap:anywhere}
+#cursor{position:absolute;top:3px;width:.6em;height:1.1em;background:var(--green);pointer-events:none;animation:blink 1s steps(2,start) infinite;opacity:.8}#console:focus-within #cursor{display:block}
 </style>
 </head>
 <body>
@@ -31,7 +32,7 @@
   
   <div class="terminal" aria-live="polite">
     <pre class="output" id="output"></pre>
-    <form id="console" autocomplete="off"><span class="prompt">browser&gt;</span><input id="input" name="command" spellcheck="false" aria-label="Console input" autocomplete="off" autocapitalize="off" autocorrect="off"></form>
+    <form id="console" autocomplete="off"><span class="prompt">browser&gt;</span><input id="input" name="command" spellcheck="false" aria-label="Console input" autocomplete="off" autocapitalize="off" autocorrect="off"><span id="cursor" aria-hidden="true"></span></form>
   </div>
   <p class="meta">demo</p>
 </main>
@@ -60,8 +61,12 @@ form.addEventListener('submit',async(event)=>{
       if(response.ok){out.textContent+='\nSuccess.';bar.classList.remove('hide')}
     }
   }catch(error){out.textContent=error.name+': '+error.message}
-  finally{busy=false;input.disabled=false;input.focus()}
+  finally{busy=false;input.disabled=false;input.focus();placeCursor()}
 });
+const cursor=document.querySelector('#cursor'),measure=document.createElement('canvas').getContext('2d');
+function placeCursor(){measure.font=getComputedStyle(input).font;const width=measure.measureText(input.value.slice(0,input.selectionStart||0)).width;cursor.style.left=Math.min(input.offsetLeft+width-input.scrollLeft,input.offsetLeft+input.clientWidth-10)+'px';cursor.style.display=input.disabled?'none':'block'}
+['input','keyup','click','focus','scroll'].forEach(event=>input.addEventListener(event,placeCursor));
+window.addEventListener('resize',placeCursor);placeCursor();input.focus();
 document.querySelector('#accept').addEventListener('click',()=>bar.classList.add('hide'));
 </script>
 </body>
