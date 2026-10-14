@@ -22,21 +22,21 @@
 .cookie button.primary{background:var(--green);color:#0d1410;border-color:var(--green);font-weight:600}
 .cookie button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#console{margin:16px 0}#console label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px}.entry{display:flex;gap:8px}.entry input{flex:1;min-width:0;padding:11px;background:#0d0f13;color:var(--ink);border:1px solid #424754;border-radius:7px;font:inherit;font-size:14px}.entry button{padding:10px 16px;border:1px solid #424754;border-radius:7px;background:#242832;color:var(--ink);font:inherit;font-size:14px;min-height:44px;cursor:pointer}.entry input:focus-visible,.entry button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 </style>
 </head>
 <body>
 <main class="wrap">
   <h1>nginx debug console</h1>
-  <p class="sub">X-Debug-Eval enabled.</p>
+  
   <div class="terminal" aria-live="polite">
-    <div><span class="prompt">visitor@nginx:~$</span> <span id="command">ready<span class="caret" aria-hidden="true"></span></span></div>
-    <pre class="output" id="output">Select a command.</pre>
+    <div><span class="prompt">browser&gt;</span> <span id="command"><span class="caret" aria-hidden="true"></span></span></div>
+    <pre class="output" id="output"></pre>
   </div>
-  <div class="commands" aria-label="Commands">
-    <button type="button" data-command="whoami">whoami</button>
-    <button type="button" data-command="ifconfig">ifconfig</button>
-    <button type="button" data-command="ping example.com -t 1">ping example.com -t 1</button>
-  </div>
+  <form id="console" autocomplete="off">
+    
+    <div class="entry"><input id="input" name="command" spellcheck="false" aria-label="Console input" placeholder="" autocomplete="off"><button type="submit">Run</button></div>
+  </form>
   <p class="meta">demo</p>
 </main>
 <div class="cookie hide" id="cookie" role="dialog" aria-label="Bounty achieved">
@@ -45,21 +45,28 @@
   <button type="button" class="primary" id="accept">Accept all necessary cookies</button>
 </div>
 <script>
-const cmd=document.querySelector('#command'),out=document.querySelector('#output'),bar=document.querySelector('#cookie');
-const buttons=[...document.querySelectorAll('[data-command]')];
-let busy=false;
-function accept(){bar.classList.add('hide')}
-async function run(command){
-  if(busy)return;
-  busy=true;bar.classList.add('hide');buttons.forEach(b=>b.disabled=true);cmd.textContent=command;out.textContent='Running...';
+const cmd=document.querySelector('#command'),out=document.querySelector('#output'),bar=document.querySelector('#cookie'),prompt=document.querySelector('.prompt');
+const input=document.querySelector('#input'),form=document.querySelector('#console');
+let remote=false,busy=false;
+window.server={connect(){remote=true;prompt.textContent='server$';return 'Connected.'}};
+function format(value){if(typeof value==='string')return value;if(typeof value==='undefined')return 'undefined';try{return JSON.stringify(value,(key,item)=>typeof item==='function'?item.toString():item,2)}catch(error){return String(value)}}
+form.addEventListener('submit',async(event)=>{
+  event.preventDefault();if(busy)return;
+  const command=input.value;if(!command)return;
+  input.value='';busy=true;bar.classList.add('hide');cmd.textContent=command;out.textContent='Running...';
+  form.querySelector('button').disabled=true;
   try{
-    const response=await fetch('/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command}),signal:AbortSignal.timeout(8000)});
-    const result=await response.json();out.textContent=result.output||'(no output)';if(response.ok){bar.classList.remove('hide')}
-  }catch(error){out.textContent='Session unavailable. Try again.'}
-  finally{busy=false;buttons.forEach(b=>b.disabled=false)}
-}
-buttons.forEach(button=>button.addEventListener('click',()=>run(button.dataset.command)));
-document.querySelector('#accept').addEventListener('click',accept);
+    if(!remote){out.textContent=format(await (0,eval)(command))}
+    else if(command==='help'){out.textContent='whoami\nifconfig\nping example.com -t 1'}
+    else{
+      const response=await fetch('/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command}),signal:AbortSignal.timeout(8000)});
+      const result=await response.json();out.textContent=result.output||'(no output)';
+      if(response.ok){out.textContent+='\nSuccess.';bar.classList.remove('hide')}
+    }
+  }catch(error){out.textContent=error.name+': '+error.message}
+  finally{busy=false;form.querySelector('button').disabled=false;input.focus()}
+});
+document.querySelector('#accept').addEventListener('click',()=>bar.classList.add('hide'));
 </script>
 </body>
 </html>
