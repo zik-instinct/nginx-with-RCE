@@ -1,0 +1,29 @@
+[Unit]
+Description=Fixed-command nginx demo
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+ExecStart=/usr/bin/python3 /opt/nginx-command-demo/command_server.py
+Restart=on-failure
+RestartSec=3
+WorkingDirectory=/tmp
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_PACKET
+CapabilityBoundingSet=CAP_NET_RAW
+MemoryMax=64M
+TasksMax=8
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target
