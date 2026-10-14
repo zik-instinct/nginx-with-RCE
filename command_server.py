@@ -11,7 +11,7 @@ COMMANDS = {
     'ping example.com -t 1': ['/usr/bin/ping', '-c', '1', '-W', '2', '-w', '3', 'example.com'],
 }
 LIMIT = 16384
-REFUSAL = 'Permission denied. Necessary cookies do not cover that command.'
+REFUSAL = 'Command not found'
 
 
 def execute(argv):
